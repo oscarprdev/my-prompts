@@ -1,28 +1,37 @@
-# Agent Workflow
+# Coding-Agent Prompt & Skill Collection
 
-A documentation-first workflow that builds reliable software features with coding agents and specialized subagents.
+A collection of prompts and skills that implement a **documentation-first workflow** for building software features with coding agents and subagents.
 
-This repository defines a practical approach to **agent orchestration, context engineering, feature specification, architecture documentation, and independent validation**.
+This repository does not define a product or a framework. It is a toolkit of ready-to-use **agent definitions**, **documentation templates**, and **orchestration skills**. You copy the prompts and skills into your own project.
+
+The underlying workflow applies **agent orchestration, context engineering, feature specification, architecture documentation, and independent validation**.
 
 The goal is not to maximize the number of agents.
 
 The goal is to give each agent **the right responsibility, the right context, and the right handoff**.
 
-The workflow is harness-agnostic. It works in Claude Code, Codex, pi, and any agents that support subagents.
+The content is harness-agnostic. It works in Claude Code, Codex, pi, and any agent that supports subagents.
 
 ---
 
-## The Core Idea
+## What Is in This Repository
 
-The workflow uses a few simple principles:
+| Directory | Content | Purpose |
+|---|---|---|
+| `src/agents/` | 8 subagent prompt definitions | Define each specialized role: what it reads, produces, and must not do |
+| `src/documentation/` | 8 documentation prompt templates | Generate PRD, roadmap, architecture, and decisions documents |
+| `src/skills/` | 4 orchestration skills | Drive the root agent through the workflow stages |
 
-- **Specialize agents.** One agent does not do everything.
-- **Isolate context.** A single conversation does not grow without limit.
-- **Use artifacts as handoffs.** Agents pass files, not full conversations.
-- **Separate planning, implementation, and validation.**
-- **Keep architectural knowledge persistent** and feature knowledge traceable.
-- **Use the simplest workflow that reliably solves the task.**
-- **Treat the repository as the source of truth** for current implementation.
+---
+
+## How to Use
+
+1. Copy the prompts from `src/agents/` into your agent-subagent definition directory. Claude Code uses `.claude/agents/`. Other tools use their own equivalent.
+2. Copy the templates from `src/documentation/` into your documentation prompts.
+3. Copy the skills from `src/skills/` into your skill directory.
+4. Adapt the model names in the agent definitions to the models you use.
+
+The workflow is model-agnostic. Each project decides which model runs each role.
 
 ---
 
@@ -59,11 +68,21 @@ src/
 
 ---
 
-## Agent Roles
+## The Underlying Workflow
+
+The prompts and skills implement a single workflow. Every feature follows a controlled lifecycle:
+
+```text
+INTAKE → EXPLORE → DESIGN → DESIGN REVIEW → BUILD → VALIDATE → DOCUMENT → DONE
+```
+
+A stage may repeat when a later stage discovers a problem.
 
 The root agent acts as the **orchestrator**. Specialized subagents perform the actual work.
 
-| Role | Responsibility |
+### Agent Roles
+
+| Role | Purpose |
 |---|---|
 | Explorer | Investigate the existing codebase |
 | Designer | Produce the implementation design |
@@ -74,19 +93,9 @@ The root agent acts as the **orchestrator**. Specialized subagents perform the a
 | Reviewer | Review changes against evidence |
 | Documenter | Update durable architectural knowledge |
 
----
-
-## Workflow
-
-Every feature follows a controlled lifecycle:
-
-```text
-INTAKE → EXPLORE → DESIGN → DESIGN REVIEW → BUILD → VALIDATE → DOCUMENT → DONE
-```
-
-A stage may repeat when a later stage discovers a problem.
-
 When validation fails, the workflow does not restart from the beginning. The failure is diagnosed and routed to the stage responsible for its root cause.
+
+---
 
 ## Artifact-Driven Handoffs
 
@@ -181,50 +190,9 @@ Historical decisions are not rewritten when the architecture changes. A new ADR 
 
 ---
 
-## Understanding the Workflow
+## Principles
 
-### Why subagents?
-
-- Context isolation
-- Specialization
-- Independent validation
-- Parallel research
-
-A subagent is not necessarily a more capable model. Its main value is a clean context window dedicated to one problem.
-
-### Why independent validation?
-
-The agent that designs or implements a feature does not validate its own work:
-
-```text
-Designer
-   ↓
-Design Reviewer
-
-Builder
-   ↓
-Validator
-```
-
-Reviewers receive an independent context. They challenge the previous stage instead of continuing it.
-
-### Model assignment
-
-The workflow is model-agnostic. Different stages can use different models:
-
-```text
-Exploration / high-volume research  →  cheap, fast model
-
-Design / implementation            →  strong reasoning model
-
-Review / validation                →  independent model
-```
-
-Use **capability-to-task matching** instead of the strongest model everywhere. Measure the result with cost, latency, first-pass success, retry rate, context usage, and overall task success.
-
----
-
-## Design Principles
+The prompts enforce these design principles:
 
 1. **Minimize context, not information.** Keep information as artifacts. Inject it only when needed.
 2. **Parallelize research, not decisions.** Investigation can run in parallel. Ownership stays explicit.
@@ -233,16 +201,21 @@ Use **capability-to-task matching** instead of the strongest model everywhere. M
 5. **Fail locally.** A failure returns to the stage responsible for its root cause.
 6. **Keep durable knowledge outside the conversation.** The filesystem becomes part of the agent's working memory.
 
+Additional rules:
+
+- **Independent validation.** The agent that builds a feature does not validate its own work. Reviewers receive an independent context.
+- **Capability-to-task model matching.** Exploration can run on a cheap, fast model. Design and implementation benefit from a strong reasoning model. Review should use an independent model.
+
 ---
 
 ## References
 
-This workflow is a synthesis of established work on agent orchestration, context engineering, software architecture, and agent evaluation.
+The prompts are a synthesis of established work on agent orchestration, context engineering, software architecture, and agent evaluation.
 
 ### Agent Workflows
 
-- **Anthropic — Building Effective Agents**: Foundational work on agent architectures, including sequential workflows, parallelization, routing, orchestrator-worker patterns, and evaluator-optimizer systems.
-- **Anthropic — Building Effective AI Agents: Architecture Patterns**: Recent guidance on single-agent systems, multi-agent orchestration, context management, modularity, and Skills.
+- **Anthropic — Building Effective Agents**: Agent architectures, including sequential workflows, parallelization, routing, orchestrator-worker patterns, and evaluator-optimizer systems.
+- **Anthropic — Building Effective AI Agents: Architecture Patterns**: Single-agent systems, multi-agent orchestration, context management, modularity, and Skills.
 - **LangChain — How and When to Build Multi-Agent Systems**: When multi-agent architectures are useful and why context engineering matters.
 - **LangChain — Subagents**: Supervisor/subagent architectures, input context, output contracts, routing, and context isolation.
 
@@ -251,7 +224,7 @@ This workflow is a synthesis of established work on agent orchestration, context
 - **LangChain — Context Engineering for Agents**: The strategies of writing, selecting, compressing, and isolating context.
 - **LangChain — How Agents Can Use Filesystems for Context Engineering**: Using filesystems to offload context and preserve intermediate work.
 - **LangChain — Context Management for Deep Agents**: Compression, filesystem offloading, summarization, and long-running workflows.
-- **LangChain — Using Skills with Deep Agents**: Skills as reusable instruction and context packages.
+- **LangChain — Using Skills with Deep Agents**: Skills as reusable instruction packages.
 
 ### Coding Subagents
 
@@ -270,22 +243,6 @@ This workflow is a synthesis of established work on agent orchestration, context
 
 - **Anthropic — Demystifying Evals for AI Agents**: Targeted evaluation of real behaviors over aggregate benchmarks.
 - **LangChain — How We Build Evals for Deep Agents**: Behavior-focused evaluation and iterative improvement.
-
-### How the References Map to This Repository
-
-| Concept | Main References |
-|---|---|
-| Agent workflows | Anthropic — Building Effective Agents |
-| Multi-agent orchestration | Anthropic + LangChain |
-| Context isolation | LangChain + Claude Code |
-| Context engineering | LangChain |
-| Filesystem as externalized context | LangChain |
-| Specialized subagents | LangChain + Claude Code |
-| Independent validation | Anthropic Evals + evaluator patterns |
-| Architecture documentation | Fowler + Microsoft |
-| Architecture decisions | ADR |
-| Documentation organization | Diátaxis |
-| Persistent feature artifacts | Context engineering + filesystem patterns |
 
 ---
 
