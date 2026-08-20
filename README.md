@@ -1,6 +1,6 @@
 # Agent Workflow
 
-A documentation-first workflow for building reliable software features with coding agents and specialized subagents.
+A documentation-first workflow that builds reliable software features with coding agents and specialized subagents.
 
 This repository defines a practical approach to **agent orchestration, context engineering, feature specification, architecture documentation, and independent validation**.
 
@@ -8,21 +8,71 @@ The goal is not to maximize the number of agents.
 
 The goal is to give each agent **the right responsibility, the right context, and the right handoff**.
 
+The workflow is harness-agnostic. It works in Claude Code, Codex, pi, and any agents that support subagents.
+
 ---
 
-## Philosophy
+## The Core Idea
 
-The workflow is built around a few principles:
+The workflow uses a few simple principles:
 
-* **Specialize agents instead of making one agent do everything.**
-* **Isolate context instead of continuously growing a single conversation.**
-* **Use artifacts as handoffs instead of passing entire conversations between agents.**
-* **Separate planning, implementation, and validation.**
-* **Keep architectural knowledge persistent and feature knowledge traceable.**
-* **Use the simplest workflow that reliably solves the task.**
-* **Treat the repository as the source of truth for current implementation.**
+- **Specialize agents.** One agent does not do everything.
+- **Isolate context.** A single conversation does not grow without limit.
+- **Use artifacts as handoffs.** Agents pass files, not full conversations.
+- **Separate planning, implementation, and validation.**
+- **Keep architectural knowledge persistent** and feature knowledge traceable.
+- **Use the simplest workflow that reliably solves the task.**
+- **Treat the repository as the source of truth** for current implementation.
 
-This approach combines ideas from agent orchestration, context engineering, software architecture documentation, and established engineering practices.
+---
+
+## Repository Structure
+
+```text
+src/
+├── agents/           # Prompt definitions for each specialized subagent
+│   ├── explorer.md
+│   ├── designer.md
+│   ├── design-reviewer.md
+│   ├── builder.md
+│   ├── validator.md
+│   ├── debugger.md
+│   ├── reviewer.md
+│   └── documenter.md
+│
+├── documentation/    # Prompt templates that generate project documentation
+│   ├── product-prd.md
+│   ├── product-roadmap.md
+│   ├── architecture-overview.md
+│   ├── architecture-component.md
+│   ├── architecture-index.md
+│   ├── audit.md
+│   ├── conventions.md
+│   └── decisions.md
+│
+└── skills/           # Orchestration skills for the root agent
+    ├── implement-feature/SKILL.md
+    ├── implement/SKILL.md
+    ├── review/SKILL.md
+    └── roast-me/SKILL.md
+```
+
+---
+
+## Agent Roles
+
+The root agent acts as the **orchestrator**. Specialized subagents perform the actual work.
+
+| Role | Responsibility |
+|---|---|
+| Explorer | Investigate the existing codebase |
+| Designer | Produce the implementation design |
+| Design Reviewer | Independently challenge the design |
+| Builder | Implement the approved design |
+| Validator | Independently verify the implementation |
+| Debugger | Diagnose validation failures |
+| Reviewer | Review changes against evidence |
+| Documenter | Update durable architectural knowledge |
 
 ---
 
@@ -36,25 +86,13 @@ INTAKE → EXPLORE → DESIGN → DESIGN REVIEW → BUILD → VALIDATE → DOCUM
 
 A stage may repeat when a later stage discovers a problem.
 
-The root agent acts as the **orchestrator**. Specialized subagents perform the actual work.
-
-Typical responsibilities are:
-
-* **Explorer** — understand the existing codebase.
-* **Designer** — produce the implementation design.
-* **Design Reviewer** — independently challenge the design.
-* **Builder** — implement the approved design.
-* **Validator** — independently verify the implementation.
-* **Debugger** — diagnose validation failures.
-* **Documentation Agent** — update durable architectural knowledge when necessary.
-
----
+When validation fails, the workflow does not restart from the beginning. The failure is diagnosed and routed to the stage responsible for its root cause.
 
 ## Artifact-Driven Handoffs
 
 Agents do not pass their complete conversations to each other.
 
-Instead, each stage produces a persistent artifact:
+Each stage produces a persistent artifact:
 
 ```text
 FEATURE.md
@@ -74,15 +112,15 @@ Documentation
 
 This provides:
 
-* Context isolation
-* Explicit contracts
-* Persistent state
-* Traceable decisions
-* Smaller prompts
-* Easier retries
-* Better reproducibility
+- Context isolation
+- Explicit contracts
+- Persistent state
+- Traceable decisions
+- Smaller prompts
+- Easier retries
+- Better reproducibility
 
-Large or noisy information can remain outside the active model context and be loaded only when required.
+Large or noisy information stays outside the active model context. It is loaded only when required.
 
 ---
 
@@ -118,81 +156,45 @@ specs/
     └── DEBUG.md
 ```
 
-### Product
+### Documentation types
 
-Describes **what the product is trying to achieve**.
+- **Product** describes what the product tries to achieve.
+- **Architecture** describes how the system is structured.
+- **Decisions** describe why important architectural decisions were made.
+- **Conventions** describe established engineering practices.
+- **Specs** describe how a specific feature is researched, designed, implemented, and validated.
 
-### Architecture
+The code is the source of truth for current implementation. Documentation records durable knowledge that is difficult to infer from code.
 
-Describes **how the system is structured**.
+### Architecture Decision Records
 
-### Decisions
+Important decisions are recorded as ADRs. An ADR captures:
 
-Describes **why important architectural decisions were made**.
+- Context
+- Decision
+- Alternatives
+- Consequences
+- Constraints
+- Status
 
-### Conventions
-
-Describes **established engineering practices**.
-
-### Specs
-
-Describes **how a specific feature is being researched, designed, implemented, and validated**.
-
-The code remains the source of truth for current implementation.
-
----
-
-## Context Engineering
-
-A central design principle is that every subagent should receive only the context necessary for its current task.
-
-Instead of:
-
-```text
-entire repository
-+ entire documentation tree
-+ entire conversation
-+ previous agent reasoning
-```
-
-the workflow prefers:
-
-```text
-task
-+ relevant artifact
-+ relevant documentation
-+ repository access
-```
-
-This follows the broader idea of **context engineering**: selecting, writing, compressing, and isolating context so the model receives the information needed for the next step without unnecessary context accumulation.
+Historical decisions are not rewritten when the architecture changes. A new ADR supersedes the previous one. This preserves the evolution of the architecture.
 
 ---
 
-## Why Subagents?
+## Understanding the Workflow
 
-Subagents are primarily used for:
+### Why subagents?
 
-* Context isolation
-* Specialization
-* Independent validation
-* Parallel research
-* Reducing unnecessary context in the main session
+- Context isolation
+- Specialization
+- Independent validation
+- Parallel research
 
-A subagent is not necessarily a more capable model.
+A subagent is not necessarily a more capable model. Its main value is a clean context window dedicated to one problem.
 
-Often, its main value is that it gets **a clean context window dedicated to one problem**.
+### Why independent validation?
 
-This repository therefore treats subagents as specialized workers rather than independent conversational assistants.
-
----
-
-## Independent Validation
-
-Generation and evaluation are intentionally separated.
-
-The agent that designs or implements a feature should not automatically be trusted to validate its own work.
-
-For example:
+The agent that designs or implements a feature does not validate its own work:
 
 ```text
 Designer
@@ -204,275 +206,72 @@ Builder
 Validator
 ```
 
-Reviewers receive an independent context and are expected to challenge the previous stage rather than simply continue it.
+Reviewers receive an independent context. They challenge the previous stage instead of continuing it.
 
-When validation fails, the workflow does not automatically restart from the beginning. The failure is diagnosed and routed to the stage responsible for fixing its root cause.
+### Model assignment
 
----
-
-## Architecture Documentation
-
-The repository distinguishes between **current implementation** and **architectural intent**.
-
-The code answers:
-
-> What does the system currently do?
-
-Architecture documentation answers:
-
-> What are the important boundaries, responsibilities, and invariants?
-
-Architecture Decision Records answer:
-
-> Why was this decision made?
-
-This avoids turning documentation into a second, constantly outdated copy of the codebase.
-
-Architectural documentation should focus on durable knowledge that is difficult to infer quickly from implementation details.
-
----
-
-## Architecture Decision Records
-
-Important architectural decisions are recorded as individual ADRs.
-
-An ADR should capture:
-
-* Context
-* Decision
-* Alternatives
-* Consequences
-* Constraints
-* Status
-
-Historical decisions should not be rewritten when the architecture changes. A new decision should supersede the previous one.
-
-This preserves the evolution of architectural thinking rather than only documenting the current state.
-
----
-
-## When to Update Documentation
-
-Not every implementation change requires documentation changes.
-
-Documentation should be updated when a feature changes durable knowledge such as:
-
-* Architectural boundaries
-* Domain boundaries
-* Component responsibilities
-* Important invariants
-* Public contracts
-* Major data flows
-* External integrations
-* Architectural decisions
-* Established conventions
-
-Normal implementation details, small refactors, tests, and bug fixes should generally remain represented by code and tests.
-
----
-
-## Model Assignment
-
-The workflow is model-agnostic.
-
-Different stages can use different models depending on their requirements.
-
-A practical strategy is:
+The workflow is model-agnostic. Different stages can use different models:
 
 ```text
-Exploration / high-volume research
-        ↓
-cheap / fast model
+Exploration / high-volume research  →  cheap, fast model
 
-Design / implementation
-        ↓
-strong reasoning model
+Design / implementation            →  strong reasoning model
 
-Review / validation
-        ↓
-independent model
+Review / validation                →  independent model
 ```
 
-The important principle is **capability-to-task matching**, not using the strongest model everywhere.
-
-Model selection should ultimately be measured using:
-
-* Cost
-* Latency
-* First-pass success
-* Retry rate
-* Context usage
-* Overall task success
+Use **capability-to-task matching** instead of the strongest model everywhere. Measure the result with cost, latency, first-pass success, retry rate, context usage, and overall task success.
 
 ---
 
 ## Design Principles
 
-### 1. Minimize context, not information
-
-Do not remove information that matters.
-
-Instead, keep information available as artifacts and inject it only when needed.
-
-### 2. Parallelize research, not decisions
-
-Independent investigation can happen in parallel.
-
-Architectural decisions and implementation ownership should remain explicit.
-
-### 3. One owner per artifact
-
-Each artifact has one responsible agent.
-
-Other agents may read it, but should not silently rewrite it.
-
-### 4. Prefer deterministic workflows where possible
-
-Well-defined engineering processes benefit from explicit stages and gates.
-
-Use dynamic agent behavior when the problem genuinely requires it.
-
-### 5. Fail locally
-
-A validation failure should normally return to the stage responsible for its root cause instead of restarting the entire workflow.
-
-### 6. Keep durable knowledge outside the conversation
-
-Important discoveries, decisions, and validation results should become persistent artifacts.
-
-The filesystem becomes part of the agent's working memory.
+1. **Minimize context, not information.** Keep information as artifacts. Inject it only when needed.
+2. **Parallelize research, not decisions.** Investigation can run in parallel. Ownership stays explicit.
+3. **One owner per artifact.** One agent owns each artifact. Others may read it but do not silently rewrite it.
+4. **Prefer deterministic workflows.** Explicit stages and gates work well for well-defined processes.
+5. **Fail locally.** A failure returns to the stage responsible for its root cause.
+6. **Keep durable knowledge outside the conversation.** The filesystem becomes part of the agent's working memory.
 
 ---
 
-# References
+## References
 
-This workflow is a synthesis of established work on agent orchestration, context engineering, software architecture, documentation, and agent evaluation.
+This workflow is a synthesis of established work on agent orchestration, context engineering, software architecture, and agent evaluation.
 
-## Agent Workflows
+### Agent Workflows
 
-### Anthropic — Building Effective Agents
+- **Anthropic — Building Effective Agents**: Foundational work on agent architectures, including sequential workflows, parallelization, routing, orchestrator-worker patterns, and evaluator-optimizer systems.
+- **Anthropic — Building Effective AI Agents: Architecture Patterns**: Recent guidance on single-agent systems, multi-agent orchestration, context management, modularity, and Skills.
+- **LangChain — How and When to Build Multi-Agent Systems**: When multi-agent architectures are useful and why context engineering matters.
+- **LangChain — Subagents**: Supervisor/subagent architectures, input context, output contracts, routing, and context isolation.
 
-Foundational work on agent architectures, including sequential workflows, parallelization, routing, orchestrator-worker patterns, and evaluator-optimizer systems.
+### Context Engineering
 
-:contentReference[oaicite:0]{index=0}
+- **LangChain — Context Engineering for Agents**: The strategies of writing, selecting, compressing, and isolating context.
+- **LangChain — How Agents Can Use Filesystems for Context Engineering**: Using filesystems to offload context and preserve intermediate work.
+- **LangChain — Context Management for Deep Agents**: Compression, filesystem offloading, summarization, and long-running workflows.
+- **LangChain — Using Skills with Deep Agents**: Skills as reusable instruction and context packages.
 
-### Anthropic — Building Effective AI Agents: Architecture Patterns
+### Coding Subagents
 
-More recent guidance covering single-agent systems, multi-agent orchestration, sequential and parallel workflows, evaluator-optimizer patterns, context management, modularity, and Skills.
+- **Claude Code — Custom Subagents**: Specialized subagents, independent context windows, and delegation.
+- **Claude Code — Skills and Subagents**: The distinction between skills and subagents.
+- **Claude Agent SDK — Subagents**: Context isolation, parallelization, and specialized instructions.
 
-:contentReference[oaicite:1]{index=1}
+### Architecture Documentation
 
-### LangChain — How and When to Build Multi-Agent Systems
+- **Martin Fowler — Architecture Decision Record**: ADRs, historical decisions, superseding records.
+- **Microsoft — Architecture Decision Records**: When to create ADRs and how to maintain them.
+- **Architectural Decision Records**: Community repository of ADR practices and templates.
+- **Diátaxis**: A documentation framework: tutorials, how-to guides, reference, and explanation.
 
-Discusses when multi-agent architectures are useful, the importance of context engineering, and why heavily parallelizable research tasks are a stronger fit for multi-agent systems than many coding tasks.
+### Agent Evaluation
 
-:contentReference[oaicite:2]{index=2}
+- **Anthropic — Demystifying Evals for AI Agents**: Targeted evaluation of real behaviors over aggregate benchmarks.
+- **LangChain — How We Build Evals for Deep Agents**: Behavior-focused evaluation and iterative improvement.
 
-### LangChain — Subagents
-
-Detailed reference for supervisor/subagent architectures, subagent specifications, input context, output contracts, routing, and context isolation.
-
-:contentReference[oaicite:3]{index=3}
-
----
-
-## Context Engineering
-
-### LangChain — Context Engineering for Agents
-
-A foundational reference for context engineering and the strategies of writing, selecting, compressing, and isolating context.
-
-:contentReference[oaicite:4]{index=4}
-
-### LangChain — How Agents Can Use Filesystems for Context Engineering
-
-Explores using filesystems to offload large context, preserve intermediate work, and selectively retrieve information instead of keeping everything in the active conversation.
-
-:contentReference[oaicite:5]{index=5}
-
-### LangChain — Context Management for Deep Agents
-
-Covers context compression, filesystem offloading, summarization, and managing long-running agent workflows.
-
-:contentReference[oaicite:6]{index=6}
-
-### LangChain — Using Skills with Deep Agents
-
-Explores skills as reusable instruction/context packages and their relationship with filesystem-based agent workflows.
-
-:contentReference[oaicite:7]{index=7}
-
----
-
-## Coding Subagents
-
-### Claude Code — Custom Subagents
-
-Practical documentation for specialized coding subagents, independent context windows, tool restrictions, delegation, and project-level subagent definitions.
-
-:contentReference[oaicite:8]{index=8}
-
-### Claude Code — Skills and Subagents
-
-Useful reference for understanding the distinction between skills and subagents and when context isolation is appropriate.
-
-:contentReference[oaicite:9]{index=9}
-
-### Claude Agent SDK — Subagents
-
-Explains using subagents to isolate context, parallelize focused work, and apply specialized instructions.
-
-:contentReference[oaicite:10]{index=10}
-
----
-
-## Architecture Documentation
-
-### Martin Fowler — Architecture Decision Record
-
-Defines ADRs as short records of individual architectural decisions, including context, decision, and consequences. It also recommends preserving historical decisions and creating superseding ADRs rather than rewriting them.
-
-:contentReference[oaicite:11]{index=11}
-
-### Microsoft — Architecture Decision Records
-
-Guidance on when to create ADRs, what they should contain, and how to maintain architectural decision history.
-
-:contentReference[oaicite:12]{index=12}
-
-### Architectural Decision Records
-
-Community repository containing ADR practices, formats, templates, and additional references.
-
-:contentReference[oaicite:13]{index=13}
-
-### Diátaxis
-
-A documentation framework that separates documentation into tutorials, how-to guides, reference, and explanation.
-
-:contentReference[oaicite:14]{index=14}
-
----
-
-## Agent Evaluation
-
-### Anthropic — Demystifying Evals for AI Agents
-
-Discusses evaluation strategies for autonomous agents, emphasizing targeted evaluation of real behaviors rather than relying only on aggregate benchmarks.
-
-:contentReference[oaicite:15]{index=15}
-
-### LangChain — How We Build Evals for Deep Agents
-
-Describes behavior-focused evaluation, targeted eval suites, trace analysis, and using evaluations to iteratively improve agent workflows.
-
-:contentReference[oaicite:16]{index=16}
-
----
-
-## How These References Map to This Repository
-
-The repository combines these ideas into a concrete workflow:
+### How the References Map to This Repository
 
 | Concept | Main References |
 |---|---|
@@ -488,4 +287,12 @@ The repository combines these ideas into a concrete workflow:
 | Documentation organization | Diátaxis |
 | Persistent feature artifacts | Context engineering + filesystem patterns |
 
-The exact combination used in this repository — feature artifacts, specialized coding agents, explicit handoffs, isolated validation, persistent specifications, and architecture documentation — is the practical architecture proposed here, built on top of these established principles.
+---
+
+## License
+
+MIT. See [LICENSE](LICENSE).
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md).
