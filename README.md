@@ -33,6 +33,32 @@ The content is harness-agnostic. It works in Claude Code, Codex, pi, and any age
 
 The workflow is model-agnostic. Each project decides which model runs each role.
 
+## Install the Skills with `npx skills`
+
+The orchestration skills in `src/skills/` can be installed directly into any project (or globally) with the [Vercel agent-skills CLI](https://github.com/vercel-labs/agent-skills):
+
+```sh
+# Install all skills from this repository into the current project
+npx skills add oscarprdev/my-prompts
+
+# Install globally (available in all projects)
+npx skills add oscarprdev/my-prompts -g
+
+# Choose which skills and which agents to install
+npx skills add oscarprdev/my-prompts -s '*' -a '*'
+```
+
+Notes:
+
+- Only the `SKILL.md` files under `src/skills/` are installed. The `agents/` and `documentation/` directories are ignored by the CLI.
+- Verify what would be installed before installing:
+
+  ```sh
+  npx skills add oscarprdev/my-prompts -l
+  ```
+
+- The repository must be public for others to install it.
+
 ---
 
 ## Repository Structure
