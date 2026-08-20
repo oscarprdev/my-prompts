@@ -1,6 +1,6 @@
 ---
 name: roast-me
-description: Read-only code-review workflow. Use when asked to "roast" a codebase or produce a ranked, evidence-backed critique before any code mutation: ground findings in repository evidence, rank by impact, propose minimal fixes, and end with structured questions or a decision-complete review. Harness-agnostic; works in Claude Code, Codex, pi, or any agent.
+description: "Read-only code-review workflow. Use when asked to \"roast\" a codebase or produce a ranked, evidence-backed critique before any code mutation. Ground findings in repository evidence, rank by impact, propose minimal fixes, and end with structured questions or a decision-complete review. Harness-agnostic; works in Claude Code, Codex, pi, or any agent."
 ---
 
 # Roast Me

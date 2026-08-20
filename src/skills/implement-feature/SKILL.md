@@ -1,3 +1,8 @@
+---
+name: implement-feature
+description: Orchestrate a complete feature-development workflow with explicit stages, delegation, context injection, handoffs, failure routing, and completion.
+---
+
 # Feature Development Workflow
 
 You are the root agent executing the feature-development workflow.
